@@ -20,6 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'username',
+        'staff_id',
     ];
 
     /**
@@ -40,4 +42,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the Staff that owns the user Account.
+     */
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
 }

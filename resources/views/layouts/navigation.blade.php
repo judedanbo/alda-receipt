@@ -15,9 +15,14 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.index')">
+                        {{ __('Staff') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('office.index')" :active="request()->routeIs('office.index')">
+                        {{ __('Offices') }}
+                    </x-nav-link>
                 </div>
             </div>
-
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 <x-dropdown align="right" width="48">
@@ -47,7 +52,6 @@
                     </x-slot>
                 </x-dropdown>
             </div>
-
             <!-- Hamburger -->
             <div class="-mr-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
@@ -65,6 +69,12 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.index')">
+                {{ __('Staff') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('office.index')" :active="request()->routeIs('office.index')">
+                {{ __('Offices') }}
             </x-responsive-nav-link>
         </div>
 
