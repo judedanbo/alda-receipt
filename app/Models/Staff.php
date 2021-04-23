@@ -44,5 +44,10 @@ class Staff extends Model
         return $this->belongsToMany(Office::class)->withTimestamps();
     }
 
+    public function getCurrentOfficeAttribute()
+    {
+        return $this->offices->where('end_date', null)->order_by('start_date')->first();
+    }
+
     
 }

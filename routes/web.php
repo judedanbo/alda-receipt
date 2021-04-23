@@ -6,6 +6,10 @@ use App\Http\Livewire\OfficeView;
 use App\Http\Livewire\StaffData;
 use App\Http\Livewire\StaffForm;
 use App\Http\Livewire\StaffView;
+use App\Http\Livewire\DeclarationData;
+use App\Http\Livewire\DeclarationView;
+use App\Http\Livewire\DeclarationReceipt;
+use App\Http\Livewire\DeclarationForm;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,3 +42,9 @@ Route::get('/staff-form/{staff?}', StaffForm::class)->name('staff.create');
 Route::get('/office', OfficeData::class)->name('office.index');
 Route::get('/office/{office}', OfficeView::class)->name('office.show');
 Route::get('/office-form/{office?}', OfficeForm::class)->name('office.create');
+
+
+Route::get('/declaration', DeclarationData::class)->name('declaration.index');
+Route::get('/declaration/{declaration}', DeclarationView::class)->name('declaration.show');
+Route::get('/declaration/{declaration}/receipt', DeclarationReceipt::class)->name('declaration.receipt');
+Route::get('/declaration-form/{declaration?}', DeclarationForm::class)->name('declaration.form');

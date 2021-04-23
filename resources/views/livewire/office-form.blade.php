@@ -4,7 +4,7 @@
             {{ isset($office->id) ? 'Edit Office Records': 'Add New Office'}}
          </h2>
         
-        <form wire:submit.prevent="save">
+        <form wire:submit.prevent="save" method="POST">
             
             {{-- Office ID --}}
             <x-input.group label="Office ID" for="office_id" :error="$errors->first('office.office_id')">

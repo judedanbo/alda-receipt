@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
 
         Builder::macro('search', function ($field, $string) {
             return $string ? $this->orWhere($field, 'like', '%'.$string.'%') : $this;
+        });
+
+        Builder::macro('searchDate', function ($field, $string) {
+            // {{ $field }}
+            return $string ? $this->orWhereRaw('MONTHNAME(declared_on) like', '%' . $string . '%') : $this;
         });
     }
 }

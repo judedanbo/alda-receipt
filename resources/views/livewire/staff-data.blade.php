@@ -85,7 +85,7 @@
     </div>
 
     <!-- Delete Staff Modal -->
-    <form wire:submit.prevent="deleteSelected">
+    <form wire:submit.prevent="deleteSelected" method="POST">
     <x-modal.confirmation wire:model.defer="showDeleteModal">
             <x-slot name="title">Delete Staff</x-slot>
 
@@ -114,7 +114,7 @@
                     {{ isset($staff->id) ? 'Edit Staff Records': 'Add New Staff'}}
                 </h2>
                 
-                <form wire:submit.prevent="save" class="pt-5">
+                <form wire:submit.prevent="save" class="pt-5" method="POST">
                     
                     <div class="flex gap-4">
                         {{-- Staff ID --}}

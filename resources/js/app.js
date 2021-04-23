@@ -1,3 +1,8 @@
-require('./bootstrap');
+require('./bootstrap')
 
-require('alpinejs');
+require('alpinejs')
+
+window.moment = require('moment')
+
+window.Pikaday =  require('pikaday')
+

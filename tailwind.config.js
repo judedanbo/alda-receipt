@@ -9,9 +9,32 @@ module.exports = {
 
     theme: {
         extend: {
+            spacing: {
+                '13': '3.25rem',
+                '15': '3.75rem',
+                '128': '32rem',
+                '144': '36rem',
+                '160': '40rem',
+                '176': '44rem',
+              },
+            backgroundImage: (theme) => ({
+                'gas-logo' : "url('/images/logo.jpg')"
+            }),
+            backgroundSize: {
+                'auto': 'auto',
+                'cover': 'cover',
+                'contain': 'contain',
+                '50%': '50%',
+                '40%': '40%',
+                '25%': '25%',
+                '16': '4rem',
+            },
             fontFamily: {
                 sans: ['Nunito', ...defaultTheme.fontFamily.sans],
             },
+            screens :{
+                'print' : {'raw': 'print'}
+            }
         },
     },
 

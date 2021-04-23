@@ -95,7 +95,7 @@
                     Assign Office to {{$staff->full_name}}
                 </h2>
                 
-                <form wire:submit.prevent="assignOffice" class="pt-5">
+                <form wire:submit.prevent="assignOffice" class="pt-5" method="POST">
                     {{-- Offices --}}
                     <x-input.select placeholder='Select One' :error="$errors->first('office_id')" wire:model.lazy='office_id'>
                         @if ($offices->count())
@@ -124,7 +124,7 @@
                     Make {{$staff->full_name}} a user of this application
                 </h2>
                 
-                <form wire:submit.prevent="makeUser" class="pt-5">
+                <form wire:submit.prevent="makeUser" class="pt-5" method="POST">
                     {{-- Other Names --}}
                     <x-input.group label="Username" for="username" :error="$errors->first('username')">
                         <x-input.text wire:model.lazy="username" id="username" required />
