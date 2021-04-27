@@ -21,7 +21,7 @@
                     <div class="py-4 space-y-4">
                         <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
                             <li x-for="item in items">
-                              <a :href="item.url" class="hover:bg-indigo-500 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200">
+                              <a :href="item.url" class="hover:bg-green-500 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200">
                                 <dl class="grid sm:block lg:grid xl:block grid-cols-2 grid-rows-2 items-center">
                                   <div>
                                     <dt class="sr-only">Office</dt>
@@ -31,11 +31,11 @@
                                   </div>
                                   <div>
                                     <dt class="sr-only">Current Office</dt>
-                                    <dd class="group-hover:text-indigo-200 text-sm font-medium sm:mb-4 lg:mb-0 xl:mb-4"> 
+                                    <dd class="group-hover:text-green-200 text-sm font-medium sm:mb-4 lg:mb-0 xl:mb-4"> 
                                     <p>
                                         @if ($staff->offices->count())
                                            
-                                                Current Office: {{  $staff->offices->where('end_date', null)->first()->office_name }}
+                                            Current Office: {{  $staff->offices->where('end_date', null)->first()->office_name }}
                                             
                                         @else
                                             Office not assigned
@@ -49,7 +49,7 @@
                             </li>
 
                             <li x-for="item in items">
-                              <a :href="item.url" class="hover:bg-indigo-500 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200">
+                              <a :href="item.url" class="hover:bg-green-500 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200">
                                 <dl class="grid sm:block lg:grid xl:block grid-cols-2 grid-rows-2 items-center">
                                   <div>
                                     <dt class="sr-only">Account</dt>
@@ -59,7 +59,7 @@
                                   </div>
                                   <div>
                                     <dt class="sr-only">Account Details</dt>
-                                    <dd class="group-hover:text-indigo-200 text-sm font-medium sm:mb-4 lg:mb-0 xl:mb-4">
+                                    <dd class="group-hover:text-green-200 text-sm font-medium sm:mb-4 lg:mb-0 xl:mb-4">
                                     <p>
                                         @if ($staff->user)
                                             <div class="flex justify-between">

@@ -20,6 +20,9 @@
                     <div class="py-4 space-y-4">
                         <x-table lass="mt-5">
                             <x-slot name="head">
+                                <x-table.heading sortable wire:click="sortBy('synced')"  :direction="$sortField === 'synced' ? $sortDirection : null">
+                                    Synced
+                                </x-table.heading>
                                 <x-table.heading sortable wire:click="sortBy('declared_on')"  :direction="$sortField === 'declared_on' ? $sortDirection : null">
                                     Date
                                 </x-table.heading>
@@ -45,10 +48,16 @@
                                     Action
                                 </x-table.heading> -->
                             </x-slot>
-                        
+
                             <x-slot name="body">
                                 @forelse ($declarations as $current_declaration)
                                     <x-table.row class="hover:bg-gray-100 cursor-pointer" wire:click="show({{$current_declaration->id}})">
+                                        <x-table.cell>
+                                            <span 
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{$current_declaration->synced? ' bg-green-400 ': ' bg-red-400 ' }}text-white" wire:click.prevent="syncOne({{$current_declaration->id}})" >
+                                                {{$current_declaration->synced? 'Yes': 'No'}}
+                                            </span>
+                                        </x-table.cell>
                                         <x-table.cell>{{ $current_declaration->declared_on_display }}</x-table.cell>
                                         <x-table.cell>{{ $current_declaration->declarant_name }}</x-table.cell>
                                         <x-table.cell>
@@ -71,7 +80,7 @@
                                             <p>{{$current_declaration->person_submitting_contact}}</p>
                                         </x-table.cell>
                                         <!-- <x-table.cell  class="flex justify-center">
-                                            <x-button.link wire:click="show({{$current_declaration->id}})" class="ml-2 flex" > 
+                                            <x-button.link wire:click="show({{$current_declaration->id}})" class="ml-2 flex" >
                                                 <x-icon.view></x-icon.view> Details
                                             </x-button.link> -->
                                             <!-- <x-button.link wire:click="create({{ $current_declaration->id }})" class="ml-2 flex items-center ">
@@ -96,6 +105,20 @@
                 </div>
             </div>
         </div>
+        <div class="relative">
+            <div class="fixed bottom-10 right-5" >
+                <x-icon.offline class="animate-pulse w-12 h-12 text-white rounded-full p-3 bg-red-400" title="Offline" wire:offline ></x-icon.offline>
+                <x-icon.online class="animate-pulse w-12 h-12 text-white rounded-full p-3 bg-green-400 mt-2" wire:offline.class='hidden' title="Online"></x-icon.online>
+                <x-icon.refresh 
+                    class="w-12 h-12 text-white rounded-full p-3 bg-green-600 mt-2 cursor-pointer hover:bg-green-500" wire:offline.class='hidden' 
+                    wire:click='syncAll'
+                    wire:loading.class='animate-spin'
+                    wire:target='syncAll'
+                    ></x-icon.refresh>
+            </div>
+            <div  >
+            </div>
+        </div>
     </div>
 
      <!-- Add/Edit Declaration Modal -->
@@ -109,33 +132,33 @@
 
                     <x-icon.expand class="w-10 cursor-pointer" title="Open in separete window" wire:click="expandForm"></x-icon.expand>
                 </div>
-                <div class="mb-4 overflow-y-auto h-176">
-                    <form wire:submit.prevent="save" method="POST">
+                <div class="mb-4 mx-2 overflow-y-auto h-176">
+                    <form wire:submit.prevent="save" method="POST" class="px-2">
                         {{-- Date of Declaration --}}
                         <div class="w-full sm:w-2/3 mt-4">
-                            <label for="declared_on" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2 w-full">
+                            <label for="declared_on" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2 w-full ">
                             Date of Declaration
                             </label>
                             <div class="w-full">
-                                
-                                <input type="date" wire:model.lazy='declaration.declared_on'  id="declared_on" min="1992-01-01" max='{{date('Y-m-d')}}' class="w-full">
+
+                                <input type="date" wire:model.lazy='declaration.declared_on'  id="declared_on" min="1992-01-01" max='{{date('Y-m-d')}}' class="w-full rounded-md focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
                                 <x-input.error message="{{ $errors->first('declaration.declared_on') }}"></x-input.error>
 
                             </div>
                         </div>
 
                         {{-- Name of Declarant --}}
-                        <div class="mt-4">
-                        <label for="declarant_name" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
-                            Name of Declarant
+                        <div class="mt-4 w-full">
+                            <label for="declarant_name" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
+                                Name of Declarant
                             </label>
                             <x-input.text wire:model.lazy="declaration.declarant_name" id="declarant_name" required />
                             <x-input.error message="{{ $errors->first('declaration.declarant_name') }}"></x-input.error>
                         </div>
-                        
-                        
+
+
                     <div class="grid gap-4 grid-col-1 sm:grid-cols-3 ">
-                        <div class="col-start-1 sm:col-span-2 mt-4"> 
+                        <div class="col-start-1 sm:col-span-2 mt-4">
                             {{-- Post of Declarant --}}
                             <label for="post" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                             Post
@@ -144,7 +167,7 @@
                             <x-input.error message="{{ $errors->first('declaration.post') }}"></x-input.error>
                         </div>
 
-                        <div class="col-start-1 sm:col-start-3 mt-4"> 
+                        <div class="col-start-1 sm:col-start-3 mt-4">
                         {{-- Schedudle of Declarant --}}
                         <label for="schedule" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                         Schedudle
@@ -158,30 +181,30 @@
                         {{-- Address --}}
                         <label for="address" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                         Address
-                        </label>                   
+                        </label>
                         <x-input.text wire:model.lazy="declaration.address" id="address" required />
                         <x-input.error message="{{ $errors->first('declaration.address') }}"></x-input.error>
-                        
+
                     </div>
                     <div class="grid grid-cols-1 sm:grid-col-2 gap-4">
                         <div class="col-start-1 mt-4">
-                        
+
                             {{-- Office Location --}}
                             <label for="office_location" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                             Office Location
-                            </label> 
-                        
+                            </label>
+
                             <x-input.text wire:model.lazy="declaration.office_location" id="office_location"  />
                             <x-input.error message="{{ $errors->first('declaration.office_location') }}"></x-input.error>
                         </div>
                         <div class="cols-start-1 sm:col-start-2 mt-4">
                             <label for="contact" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                             Contact
-                            </label> 
+                            </label>
                             <x-input.text wire:model.lazy="declaration.contact" id="contact" />
                             <x-input.error message="{{ $errors->first('declaration.contact') }}"></x-input.error>
                         </div>
-                        
+
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -194,7 +217,7 @@
                             <x-input.error message="{{ $errors->first('declaration.witness') }}"></x-input.error>
                         </div>
                         <div class="col-start-1 sm:col-start-2 mt-4">
-                        
+
                             {{-- Witness Occupation --}}
                             <label for="witness_occupation" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                             Witness Occupation
@@ -213,12 +236,12 @@
                             <x-input.text wire:model.lazy="declaration.person_submitting" id="person_submitting" />
                             <x-input.error message="{{ $errors->first('declaration.person_submitting') }}"></x-input.error>
                         </div>
-                        <div class="col-start-1 sm:col-start-2 mt-4"> 
+                        <div class="col-start-1 sm:col-start-2 mt-4">
                             <label for="person_submitting_contact" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
                             Contact of Person Submitting
                             </label>
                             {{-- Contact of Person Submitting --}}
-                            
+
                             <x-input.text wire:model.lazy="declaration.person_submitting_contact" id="person_submitting_contact"  />
                             <x-input.error message="{{ $errors->first('declaration.person_submitting_contact') }}"></x-input.error>
                         </div>

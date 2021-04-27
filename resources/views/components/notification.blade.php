@@ -1,13 +1,3 @@
-{{--
--- Important note:
---
--- This template is based on an example from Tailwind UI, and is used here with permission from Tailwind Labs
--- for educational purposes only. Please do not use this template in your own projects without purchasing a
--- Tailwind UI license, or they’ll have to tighten up the licensing and you’ll ruin the fun for everyone.
---
--- Purchase here: https://tailwindui.com/
---}}
-
 <div
     x-data="{
         messages: [],
@@ -15,15 +5,15 @@
             this.messages.splice(this.messages.indexOf(message), 1)
         },
     }"
-    @notify.window="let message = $event.detail; messages.push(message); setTimeout(() => { remove(message) }, 2500)"
+    @notify.window="let message = $event.detail; messages.push(message); setTimeout(() => { remove(message) }, 5000)"
     class="fixed inset-0 flex flex-col items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:justify-start space-y-4"
 >
     <template x-for="(message, messageIndex) in messages" :key="messageIndex" hidden>
         <div
-            x-transition:enter="transform ease-out duration-300 transition"
+            x-transition:enter="transform ease-out duration-750 transition"
             x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
             x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
-            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave="transition ease-in duration-750"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto"

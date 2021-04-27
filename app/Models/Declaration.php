@@ -27,11 +27,21 @@ class Declaration extends Model
         'person_submitting',
         'person_submitting_contact',
         'user_id',
-        'qrcode'
+        'qrcode',
+        'synced'
     ];
     
     protected $casts = [
-        'declared_on' => 'date'
+        'declared_on' => 'date',
+        'synced' => 'boolean'
+    ];
+     
+    protected $hidden = [
+        'synced'
+    ];
+
+    protected $appends = [
+        'declared_on_display'
     ];
 
     public function enteredBy()
@@ -40,9 +50,8 @@ class Declaration extends Model
     }
     
 
-    function getDeclaredOnDisplayAttribute()
+    public function getDeclaredOnDisplayAttribute()
     {
         return Carbon::parse($this->declared_on)->format('j F Y');
     }
-
 }

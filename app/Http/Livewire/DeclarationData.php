@@ -8,12 +8,15 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
-
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class DeclarationData extends Component
 {
-
     use WithPagination;
     public $declaration;
     public $declaration_id;
@@ -98,12 +101,11 @@ class DeclarationData extends Component
             $this->update();
             return;
         }
-        
-        if(Auth::user()->staff){
+
+        if (Auth::user()->staff) {
             dd(Auth::user()->staff->current_office);
             $office_id = Auth::user()->staff->current_office->office_id;
-        }
-        else{
+        } else {
             $office_id = 'X0' ;
         }
 
@@ -133,7 +135,6 @@ class DeclarationData extends Component
     {
         // dd($this->declaration);
         $this->validateOnly($propertyName);
-
     }
     public function expandForm()
     {
@@ -145,11 +146,49 @@ class DeclarationData extends Component
         redirect()->route('declaration.form');
     }
 
+    public function syncOne($syncedToDeclaration)
+    {
+        $toSync =  Declaration::with('enteredBy.staff')->find($syncedToDeclaration);
+        $response = Http::post('localhost:8880/api/declarations', $toSync->toArray());
+        if ($response->body() == 'saved') {
+            $toSync->synced = true;
+            $toSync->save();
+        }
+        $this->sortField = 'synced';
+        $this->sortDirection ='asc';
+        return;
+    }
+
+    public function getUnsynced()
+    {
+        $data = Declaration::where('synced', true);
+    }
+
+    public function syncAll()
+    {
+        // DB::table('users')->count();
+        $unSynced = Declaration::where('synced', false)->count();
+        $this->notify($unSynced . ' Declaration not synchronized');
+        $data = Declaration::where('synced', false)->with('enteredBy.staff')->chunk(10, function ($declarations) {
+            // $this->notify('Declarations about to synchronize');
+            foreach ($declarations as $declaration) {
+                $response = Http::post('localhost:8880/api/declarations', $declaration->toArray());
+                if ($response->body() == 'saved') {
+                    $declaration->synced = true;
+                    $declaration->save();
+                // dd('saved');
+                } else {
+                    $this->notify('Sync failed');
+                    // dd($response->body());
+                }
+            }
+        });
+    }
+
     public function render()
     {
         return view('livewire.declaration-data', [
             'declarations' => Declaration::search('declarant_name', $this->search)
-            // ->searchDate('declared_on', $this->search)
             ->search('declared_on', $this->search)
             ->search('post', $this->search)
             ->search('schedule', $this->search)
@@ -161,7 +200,7 @@ class DeclarationData extends Component
             ->search('witness_occupation', $this->search)
             ->search('person_submitting', $this->search)
             ->search('person_submitting_contact', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection )
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(20)
         ]);
     }

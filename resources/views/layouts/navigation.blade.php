@@ -5,9 +5,11 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-10 w-auto fill-current text-gray-600" />
-                    </a>
+                    <img src="/images/gas-logo-crest.png" alt="" class="w-10">
+                    {{-- <a href="{{ route('dashboard') }}" class="bg-gas-logo">
+                        {{-- <x-application-logo class="block h-10 w-auto fill-current text-gray-600" /> 
+                        ALDA
+                    </a> --}}
                 </div>
 
                 <!-- Navigation Links -->

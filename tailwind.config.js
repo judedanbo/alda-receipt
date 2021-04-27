@@ -34,6 +34,9 @@ module.exports = {
             },
             screens :{
                 'print' : {'raw': 'print'}
+            },
+            colors: {
+                primary: defaultTheme.colors.green
             }
         },
     },
