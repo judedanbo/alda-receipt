@@ -19,6 +19,13 @@ class OfficeForm extends Component
         if ($office) {
             $this->office = Office::findOrFail($office);
         }
+
+        activity()
+            ->useLog('office')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('opened create/edit office form');
     }
 
     public function save()
@@ -30,11 +37,11 @@ class OfficeForm extends Component
             return;
         }
         
-        Office::create($validated);
+        $newOffice = Office::create($validated);
         $this->office = false;
         $this->emit('office_added');
 
-        redirect()->route('staff.index');
+        redirect()->route('office.show', ['office' => $newOffice->id]);
     }
 
     public function update()
@@ -44,6 +51,6 @@ class OfficeForm extends Component
 
     public function render()
     {
-        return view('livewire.office-form')->layout('layouts.guest');
+        return view('livewire.office-form');
     }
 }

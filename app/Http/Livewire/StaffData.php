@@ -40,6 +40,13 @@ class StaffData extends Component
     public function mount()
     {
         $this->staff = null;
+
+        activity()
+            ->useLog('staff')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('viewed all staff');
     }
     public function save()
     {
@@ -49,10 +56,11 @@ class StaffData extends Component
             $this->update();
             return;
         }
-        Staff::create($validatedStaff);
+        $newStaff = Staff::create($validatedStaff);
         $this->staff = null;
         $this->emit('staff added');
         $this->showFormModal = false;
+        redirect()->route('staff.show', ['staff' => $newStaff->id]);
     }
 
     public function update()
@@ -88,6 +96,9 @@ class StaffData extends Component
     {
         $this->showDeleteModal = false;
         $staffName = $this->staff->full_name;
+        if ($this->staff->user !== null) {
+            $this->staff->user->delete();
+        }
         $this->staff->delete();
         $this->staff = null;
 
@@ -126,7 +137,7 @@ class StaffData extends Component
                 ->search('title', $this->search)
                 ->search('other_names', $this->search)
                 ->orderBy($this->sortField, $this->sortDirection)
-                ->paginate(15)
+                ->paginate(5)
             ]
         );
     }

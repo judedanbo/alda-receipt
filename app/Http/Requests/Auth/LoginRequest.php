@@ -48,11 +48,26 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('username', 'password'), $this->filled('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            activity()
+                ->useLog('login')
+                ->withProperties([
+                        'username' => $this->username,
+                        'password' => $this->password,
+                        'session' => session()->all(),
+                        
+                    ])
+                ->log('login failed');
+
             throw ValidationException::withMessages([
                 'username' => __('auth.failed'),
             ]);
         }
-
+        activity()
+            ->useLog('login')
+            ->withProperties([
+                'session' => session()->all()
+            ])
+            ->log('login successful');
         RateLimiter::clear($this->throttleKey());
     }
 

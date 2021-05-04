@@ -8,7 +8,6 @@ use App\Models\Declaration;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
-
 class DeclarationForm extends Component
 {
     public $declaration ;
@@ -46,6 +45,7 @@ class DeclarationForm extends Component
         'declaration.person_submitting_contact' => 'contact of person submitting',
     ];
 
+
     public function save()
     {
         $validatedStaff = $this->validate()['declaration'];
@@ -54,22 +54,23 @@ class DeclarationForm extends Component
             $this->update();
             return;
         }
-        if(Auth::user()->has('staff')){
-            if(Auth::user()->staff){
-                dd(Auth::user()->staff->current_office);
-                $office_id = Auth::user()->staff->current_office->office_id;
-            }
-            else{
-                $office_id = 'X0' ;
-            }
+
+        if (Auth::user()->staff) {
+            // dd(Auth::user()->staff->current_office);
+            $office_number = Auth::user()->staff->current_office->office_id;
+            $office_id = Auth::user()->staff->current_office->id;
+        } else {
+            $office_number = 'X0' ;
+            $office_id = 1 ;
         }
 
         $total = DB::table('declarations')->count();
 
         $validatedStaff['user_id'] = Auth::id();
+        $validatedStaff['office_id'] = $office_id;
         $validatedStaff['qrcode'] = Str::random(15);
-        $validatedStaff['receipt_no'] = $office_id . Str::padLeft($total + 1, 5, '0');
-
+        $validatedStaff['receipt_no'] = $office_number . Str::padLeft($total + 1, 5, '0');
+        
         $newDeclaration = Declaration::create($validatedStaff);
         $this->declaration = null;
         $this->emit('New Declaration added');
@@ -90,16 +91,21 @@ class DeclarationForm extends Component
     {
         // dd($this->declaration);
         $this->validateOnly($propertyName);
-
     }
 
     public function mount($declaration = null)
     {
         // dd($declaration);
-        if($declaration !== null){
+        if ($declaration !== null) {
             $this->declaration = Declaration::find($declaration);
         }
-        
+
+        activity()
+            ->useLog('declaration')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('opened create/edit declaration form');
     }
 
     public function render()

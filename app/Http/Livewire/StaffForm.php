@@ -16,11 +16,18 @@ class StaffForm extends Component
             // dd($staff);
             $this->staff = Staff::findOrFail($staff);
         }
+        activity()
+            ->useLog('staff')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('create new staff form opened');
     }
 
     protected $rules = [
-        "staff.staff_id" => "required|string|min:2|max:10",
+        "staff.staff_id" => "required|integer|min:1|max:99999999",
         "staff.title" => "string|regex:/^[a-zA-Z]/u|min:2|max:10|nullable",
+        "staff.email" => "required|string|email|max:255",
         "staff.surname" => "required|string|regex:/^[a-zA-Z]/u|min:2|max:100",
         "staff.other_names" => "required|string|regex:/^[a-zA-Z]/u|min:2|max:100",
     ];
@@ -33,9 +40,11 @@ class StaffForm extends Component
             $this->update();
             return;
         }
-        Staff::create($validatedStaff);
+        $newStaff = Staff::create($validatedStaff);
         $this->staff = false;
         $this->emit('staff_added');
+
+        redirect()->route('staff.show', ['staff' =>$newStaff->id]);
     }
 
     public function update()
@@ -45,6 +54,6 @@ class StaffForm extends Component
 
     public function render()
     {
-        return view('livewire.staff-form')->layout('layouts.guest');
+        return view('livewire.staff-form');
     }
 }

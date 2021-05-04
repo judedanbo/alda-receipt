@@ -1,1 +1,1 @@
-<img src="/images/gas-logo.png" alt="Ghana Audit Service" {{ $attributes->merge(['class' => 'w-20']) }}>
+<img src="/images/gas-logo.png" alt="Ghana Audit Service" {{ $attributes->merge(['class' => '']) }}>

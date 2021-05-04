@@ -31,6 +31,14 @@ class StaffView extends Component
     {
         $this->staff =  Staff::findOrFail($staff);
         $this->offices = Office::all();
+
+        activity()
+            ->useLog('staff')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->performedOn($this->staff)
+            ->log('opened details of staff');
     }
 
     public function assignOffice(Request $request)
@@ -48,13 +56,26 @@ class StaffView extends Component
         ], $messages=[
             'unique' => 'This staff has already been assigned to this office'
         ], $attributes=["office_id" => 'Office']);
+
         $selectedOffice = Office::find($this->office_id);
+        
         $validatedData['staff_id'] = $this->staff->id;
+        
         $this->staff->offices()->attach($selectedOffice);
+
+        activity()
+            ->useLog('staff')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->performedOn($this->staff)
+            ->log('staff assigned to the '. $selectedOffice->office_name . '('. $selectedOffice->office_id .") office");
+
         $emitMessage = $this->staff->full_name . ' has been assigned to ' . $this->offices->find($this->office_id)->office_name ;
         
         $this->emit($emitMessage);
         $this->assignOfficeModal = false;
+        $this->staff->refresh();
     }
     public function makeUser()
     {
@@ -71,7 +92,18 @@ class StaffView extends Component
 
         Mail::to($this->staff->email)
             ->queue(new AccountCreated($this->staff->id, $defaultPassword));
+
+        activity()
+            ->useLog('staff')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->performedOn($this->staff)
+            ->log('staff made a user');
+
         $this->emit($emitMessage);
+
+        $this->staff->refresh();
 
         $this->makeUserModal = false;
     }
@@ -84,10 +116,21 @@ class StaffView extends Component
             $this->staff->user->password = $newPasswordHash;
             $this->staff->user->save();
 
+            
+
             $emitMessage = 'The password for '.$this->staff->full_name .' has been reset';
 
             Mail::to($this->staff->email)
                 ->queue(new PasswordReset($this->staff->id, $newPassword));
+
+            activity()
+                ->useLog('staff')
+                ->withProperties([
+                    'session' => session()->all(),
+                ])
+                ->performedOn($this->staff)
+                ->log('reset password of staff');
+
             $this->emit($emitMessage);
         }
     }

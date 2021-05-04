@@ -15,7 +15,7 @@ class CreateDeclarationsTable extends Migration
     {
         Schema::create('declarations', function (Blueprint $table) {
             $table->id();
-            $table->string('receipt_no',10);
+            $table->string('receipt_no', 10);
             $table->date('declared_on')->nullable()->default(now());
             $table->string('declarant_name');
             $table->string('post');
@@ -30,6 +30,7 @@ class CreateDeclarationsTable extends Migration
             $table->string('qrcode', 25);
             $table->boolean('synced')->default(false);
             $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('office_id')->references('id')->on('offices');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -1,7 +1,7 @@
 <div>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-gray-900">
-            {{ __('Add new declaration') }}
+            {{ __('Add/Edit Declaration') }}
         </h2>
     </x-slot>
 
@@ -13,7 +13,7 @@
                     <div class="w-full">
                         <div class="flex justify-between">
                             <h2 class="text-2xl ">
-                                {{ 'Add New Declaration'}}
+                                {{ 'Add New Declaration'}} 
                             </h2>
                         </div>
                         <div>
@@ -52,9 +52,9 @@
                                 </div>
 
                                 <div class="col-start-1 sm:col-start-3 mt-4"> 
-                                {{-- Schedudle of Declarant --}}
+                                {{-- Schedule of Declarant --}}
                                 <label for="schedule" class="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
-                                Schedudle
+                                Schedule
                                 </label>
                                     <x-input.text wire:model.lazy="declaration.schedule" id="schedule" />
                                     <x-input.error message="{{ $errors->first('declaration.schedule') }}"></x-input.error>

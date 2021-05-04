@@ -16,6 +16,14 @@
                     
                         <div class="border-t border-b border-gray-200 col-start-1 sm:col-span-4">
                             <dl>
+                                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">
+                                        Receipt Number
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        {{ $declaration->receipt_no }}   
+                                    </dd>
+                                </div>
                                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt class="text-sm font-medium text-gray-500">
                                         Date Submitted
@@ -79,8 +87,23 @@
                                         Received by
                                     </dt>
                                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                        <p>{{ $declaration->enteredBy ?$declaration->enteredBy->username :'' }}</p>
+                                        @if ( $declaration->enteredBy !== null)
+                                            @if ($declaration->enteredBy->staff !== null)
+                                                <p>{{ Str::title($declaration->enteredBy->staff->full_name) }}</p>
+                                            @else
+                                            <p>{{ Str::title($declaration->enteredBy->username) }}</p>
+                                            @endif
+                                        @endif
+                                        
                                 </div>
+                                {{-- <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">
+                                        Office
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        <p>{{ $declaration->office}}</p>
+                                   </dd>
+                                </div> --}}
                             </dl>
                         </div>
                         <div class="col-start-1 sm:col-start-5 invisible sm:visible">
@@ -88,14 +111,24 @@
                                 @if ($declaration->synced === true)
                                 <x-button class="bg-green-400" wire:click="sync">&nbsp Synced</x-button>
                                 @else
-                                <x-button class="bg-red-400" wire:click="sync">
+                                <x-button class="bg-red-500 hover:bg-red-400"  wire:click="sync" title="click to synchronize">
                                     <x-icon.refresh wire:loading.class="animate-spin" wire:target='sync'></x-icon.refresh> 
                                     &nbsp Not Synced
                                 </x-button>  
                                 @endif
                             </div>
-                            <x-button.primary wire:click="receipt" class="mr-5 px-2 mt-8"><x-icon.receipt></x-icon.receipt> &nbsp  Show Receipt</x-button.primary>
-                            <x-button.primary wire:click="edit" class="mr-5 px-2  mt-8"><x-icon.pencil></x-icon.pencil> &nbsp  Edit Declaration</x-button.primary>
+                            <x-button.primary wire:click="receipt" class="mr-5 px-2 mt-8" title="view Receipt">
+                                <x-icon.receipt></x-icon.receipt> 
+                                &nbsp  Show Receipt
+                            </x-button.primary>
+                            <x-button.primary wire:click="edit" class="mr-5 px-2  mt-8">
+                                <x-icon.pencil></x-icon.pencil>
+                                &nbsp  Edit Declaration
+                            </x-button.primary>
+                            <x-button.primary wire:click="new" class="mr-5 px-2  mt-8" title="Enter new Declaration">
+                                <x-icon.pencil></x-icon.pencil>
+                                &nbsp  New Declaration
+                            </x-button.primary>
 
                             
                         </div>

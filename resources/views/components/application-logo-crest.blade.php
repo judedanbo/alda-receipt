@@ -1,0 +1,1 @@
+<img src="/images/gas-logo-crest.png" alt="Ghana Audit Service" {{ $attributes->merge(['class' => '']) }}>

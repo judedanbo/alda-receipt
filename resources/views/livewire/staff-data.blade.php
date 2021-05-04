@@ -149,8 +149,7 @@
                             {{ isset($staff->id)?'Save':'Add' }} Staff
                         </x-button.primary>
                     </div>
-        
-                    
+
                 </form>
             </div>
         </div>

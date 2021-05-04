@@ -14,6 +14,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class DeclarationData extends Component
 {
@@ -25,7 +26,11 @@ class DeclarationData extends Component
     public $sortField = 'declared_on' ;
     public $sortDirection = 'desc' ;
 
+    public $connectedToServer = false;
+
     public $showFormModal = false;
+
+    // public $connectedToServer;
 
     protected $rules = [
         'declaration.declared_on' => 'required|date|before_or_equal:today',
@@ -59,6 +64,16 @@ class DeclarationData extends Component
         'declaration.person_submitting' => 'person submitting',
         'declaration.person_submitting_contact' => 'contact of person submitting',
     ];
+
+    public function mount()
+    {
+        activity()
+            ->useLog('declaration')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('opened all declarations');
+    }
 
     public function sortBy($field)
     {
@@ -103,17 +118,19 @@ class DeclarationData extends Component
         }
 
         if (Auth::user()->staff) {
-            dd(Auth::user()->staff->current_office);
-            $office_id = Auth::user()->staff->current_office->office_id;
+            $office_number = Auth::user()->staff->current_office->office_id;
+            $office_id = Auth::user()->staff->current_office->id;
         } else {
-            $office_id = 'X0' ;
+            $office_number = 'X0' ;
+            $office_id = 1;
         }
 
         $total = DB::table('declarations')->count();
 
         $validatedStaff['user_id'] = Auth::id();
+        $validatedStaff['office_id'] = $office_id;
         $validatedStaff['qrcode'] = Str::random(15);
-        $validatedStaff['receipt_no'] = $office_id . Str::padLeft($total + 1, 5, '0');
+        $validatedStaff['receipt_no'] = $office_number . Str::padLeft($total + 1, 5, '0');
 
         $newDeclaration = Declaration::create($validatedStaff);
         $this->declaration = null;
@@ -146,20 +163,72 @@ class DeclarationData extends Component
         redirect()->route('declaration.form');
     }
 
-    public function syncOne($syncedToDeclaration)
+    // public function updateSync()
+    // {
+    //     $toSync->synced = true;
+    //     $toSync->save();
+    // }
+
+    public function syncOne($declarationToSync)
     {
-        $toSync =  Declaration::with('enteredBy.staff')->find($syncedToDeclaration);
-        $response = Http::post('localhost:8880/api/declarations', $toSync->toArray());
-        if ($response->body() == 'saved') {
-            $toSync->synced = true;
-            $toSync->save();
+        $toSync =  Declaration::with(['enteredBy.staff', 'office'])->find($declarationToSync);
+        if ($this->connectedToServer === true) {
+            if ($toSync->synced === false) {
+                $client = new Client();
+                $promise = $client->postAsync('localhost:8880/api/declarations', [
+                    'form_params' => [$toSync->toArray()],
+                    'timeout' => 15
+                    ]);
+                // dd($promise);
+                $promise->then(
+                    function (ResponseInterface $res) use ($toSync) {
+                        if ($res->getBody()->getContents() == 'saved') {
+                            $toSync->synced = true;
+                            $toSync->save();
+                            $toSync->refresh();
+                            $this->notify('declaration for '. $toSync->declarant_name .' has been synchronized');
+
+                            activity()
+                                ->useLog('declaration sync')
+                                ->withProperties([
+                                    'session' => session()->all(),
+                                ])
+                                ->performedOn($toSync)
+                                ->log('synced with server');
+                        } else {
+                            activity()
+                                ->useLog('declaration sync')
+                                ->withProperties([
+                                    'session' => session()->all(),
+                                ])
+                                ->log('data sent but could not sync error: '.$res->getBody());
+                        }
+                    },
+                    function (RequestException $e) {
+                        // dd('error');
+                        activity()
+                            ->useLog('declaration sync')
+                            ->withProperties([
+                                'session' => session()->all(),
+                            ])
+                            ->log('failed to syc: '.$e);
+                    }
+                );
+                $promise->wait();
+                // dd('after');
+            }
         }
-        $this->sortField = 'synced';
-        $this->sortDirection ='asc';
-        return;
+
+        // $response = Http::post('localhost:8880/api/declarations', $toSync->toArray());
+        // if ($response->body() == 'saved') {
+        //     $toSync->synced = true;
+        //     $toSync->save();
+        // }
+        // $toSync->refresh();
+        // $this->sortDirection ='asc';
     }
 
-    public function getUnsynced()
+    public function getUnSynced()
     {
         $data = Declaration::where('synced', true);
     }
@@ -167,22 +236,65 @@ class DeclarationData extends Component
     public function syncAll()
     {
         // DB::table('users')->count();
-        $unSynced = Declaration::where('synced', false)->count();
-        $this->notify($unSynced . ' Declaration not synchronized');
-        $data = Declaration::where('synced', false)->with('enteredBy.staff')->chunk(10, function ($declarations) {
-            // $this->notify('Declarations about to synchronize');
-            foreach ($declarations as $declaration) {
-                $response = Http::post('localhost:8880/api/declarations', $declaration->toArray());
-                if ($response->body() == 'saved') {
-                    $declaration->synced = true;
-                    $declaration->save();
-                // dd('saved');
-                } else {
-                    $this->notify('Sync failed');
-                    // dd($response->body());
+        $unSynced = Declaration::where('synced', false);
+        if ($unSynced->count() > 0) {
+            $this->notify($unSynced->count() . ' ' . Str::plural("Declaration", $unSynced->count()). ' not synchronized');
+            $this->syncOne($unSynced->first()->id);
+        }
+
+        // $data = Declaration::where('synced', false)->with('enteredBy.staff')->chunk(2, function ($declarations) {
+        //     // $this->notify('Declarations about to synchronize');
+        //     foreach ($declarations as $declaration) {
+        //         $response = Http::post('localhost:8880/api/declarations', $declaration->toArray());
+        //         if ($response->body() == 'saved') {
+        //             $declaration->synced = true;
+        //             $declaration->save();
+        //         // dd('saved');
+        //         } else {
+        //             $this->notify('Sync failed');
+        //             // dd($response->body());
+        //         }
+        //     }
+        // });
+    }
+
+    // public function getConnectedToServerProperty()
+    // {
+    //     return $this->online();
+    // }
+
+    public function online()
+    {
+        try {
+            $client = new Client();
+            $promise = $client->getAsync('localhost:8880/api/declarations', ['timeout' => 5]);
+            // $response = Http::timeout(3)->get('localhost:8880/api/declarations');
+            $promise->then(
+                function (ResponseInterface $res) {
+                    $this->connectedToServer = true;
+                },
+                function (RequestException $e) {
+                    // dd('failed');
+                    $this->connectedToServer = false;
+                    // dd($e->getMessage());
+                    // $promise->reject('Error!');
                 }
-            }
-        });
+            );
+
+            // $promise->resolve(' .');
+            $promise->wait();
+
+            // if ($response->successful()) {
+            //     return true;
+            // }
+        } catch (\Throwable $th) {
+            // dd($th);
+            $this->connectedToServer = false;
+        }
+        
+        // $response->wait();
+        
+        return ;
     }
 
     public function render()

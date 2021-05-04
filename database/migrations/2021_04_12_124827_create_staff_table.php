@@ -20,6 +20,7 @@ class CreateStaffTable extends Migration
             $table->string('surname', 100);
             $table->string('other_names', 100);
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

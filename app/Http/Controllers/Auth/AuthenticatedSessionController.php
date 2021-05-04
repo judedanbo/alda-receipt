@@ -17,6 +17,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
+        activity()
+            ->useLog('login')
+            ->withProperties(['session' => session()->all()])
+            ->log('opened login page');
         return view('auth.login');
     }
 
@@ -43,7 +47,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        // dd(session()->all());
+        activity()
+            ->useLog('logout')
+            ->withProperties(['session' => session()->all()])
+            ->log('logged out');
+
         Auth::guard('web')->logout();
+
 
         $request->session()->invalidate();
 

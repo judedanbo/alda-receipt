@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Staff extends Model
 {
-    use HasFactory, SoftDeletes ;
+    use HasFactory, SoftDeletes, LogsActivity ;
 
     protected $fillable = [
         "staff_id",
@@ -22,6 +23,13 @@ class Staff extends Model
     protected $appends = [
         'full_name'
     ];
+
+    protected static $logAttributes = ['title', "surname", "other_names" ,'staff_id', "email"];
+
+    protected static $logName = 'staff';
+
+    protected static $logOnlyDirty = true;
+
 
     public function getFullNameAttribute()
     {
@@ -41,13 +49,13 @@ class Staff extends Model
      */
     public function offices()
     {
-        return $this->belongsToMany(Office::class)->withTimestamps();
+        return $this->belongsToMany(Office::class)
+            ->withTimestamps()
+            ->withPivot('start_date', 'end_date');
     }
 
     public function getCurrentOfficeAttribute()
     {
-        return $this->offices->where('end_date', null)->order_by('start_date')->first();
+        return $this->offices? $this->offices->where('pivot_end_date', null)->sortByDesc('pivot_start_date')->first(): null;
     }
-
-    
 }

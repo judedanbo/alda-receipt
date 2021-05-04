@@ -26,6 +26,16 @@ class OfficeData extends Component
         'office.office_name' => 'required|regex:/^[a-zA-Z]/u|string|min:2|max:50',
     ];
 
+    public function mount()
+    {
+        activity()
+            ->useLog('office')
+            ->withProperties([
+                'session' => session()->all(),
+            ])
+            ->log('opened all offices');
+    }
+
     //  sort
     public function sortBy($field)
     {
@@ -60,10 +70,11 @@ class OfficeData extends Component
             $this->update();
             return;
         }
-        Office::create($validatedStaff);
+        $newOffice = Office::create($validatedStaff);
         $this->office = null;
         $this->emit('office added');
         $this->showFormModal = false;
+        redirect()->route('office.show', ['office' => $newOffice->id]);
     }
 
     // update office

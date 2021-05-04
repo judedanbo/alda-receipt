@@ -23,6 +23,9 @@
                                 <x-table.heading sortable wire:click="sortBy('synced')"  :direction="$sortField === 'synced' ? $sortDirection : null">
                                     Synced
                                 </x-table.heading>
+                                <x-table.heading sortable wire:click="sortBy('receipt_no')"  :direction="$sortField === 'receipt_no' ? $sortDirection : null">
+                                    Receipt
+                                </x-table.heading>
                                 <x-table.heading sortable wire:click="sortBy('declared_on')"  :direction="$sortField === 'declared_on' ? $sortDirection : null">
                                     Date
                                 </x-table.heading>
@@ -30,7 +33,7 @@
                                    Name of Declarant
                                 </x-table.heading>
                                 <x-table.heading sortable wire:click="sortBy('post')"  :direction="$sortField === 'post' ? $sortDirection : null">
-                                   Post/Schedudle
+                                   Post/Schedule
                                 </x-table.heading>
                                 <x-table.heading sortable wire:click="sortBy('declaration_location')"  :direction="$sortField === 'declaration_location' ? $sortDirection : null">
                                    Office Location
@@ -51,42 +54,52 @@
 
                             <x-slot name="body">
                                 @forelse ($declarations as $current_declaration)
-                                    <x-table.row class="hover:bg-gray-100 cursor-pointer" wire:click="show({{$current_declaration->id}})">
-                                        <x-table.cell>
+                                    <x-table.row class="hover:bg-gray-100 cursor-pointer">
+                                    <x-table.cell>
                                             <span 
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{$current_declaration->synced? ' bg-green-400 ': ' bg-red-400 ' }}text-white" wire:click.prevent="syncOne({{$current_declaration->id}})" >
-                                                {{$current_declaration->synced? 'Yes': 'No'}}
+                                                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{$current_declaration->synced? ' bg-blue-400 ': ' bg-red-400 ' }}text-white" 
+                                                wire:click.prevent="syncOne({{$current_declaration->id}})" 
+                                                wire:loading.class.remove="bg-blue-400"
+                                                wire:loading.class.remove="bg-red-400"
+                                                wire:loading.class="bg-purple-400"
+                                                wire:target="syncOne({{$current_declaration->id}})">
+                                                <span wire:loading.class="hidden" wire:target="syncOne({{$current_declaration->id}})">
+                                                    {{$current_declaration->synced? 'Yes': 'No'}}
+                                                </span>
+                                                <span wire:loading wire:target="syncOne({{$current_declaration->id}})">
+                                                <x-icon.refresh class="animate-spin"></x-icon.refresh></span>
                                             </span>
                                         </x-table.cell>
-                                        <x-table.cell>{{ $current_declaration->declared_on_display }}</x-table.cell>
-                                        <x-table.cell>{{ $current_declaration->declarant_name }}</x-table.cell>
-                                        <x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
+                                            {{ $current_declaration->receipt_no }}
+                                        </x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
+                                            {{ $current_declaration->declared_on_display }}
+                                        </x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
+                                            {{ $current_declaration->declarant_name }}
+                                        </x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
                                             <p>{{ $current_declaration->post }} </p>
                                             @if($current_declaration->schedule)
                                                 <p>{{$current_declaration->schedule}}</p>
                                             @endif
                                         </x-table.cell>
-                                        <x-table.cell>{{ $current_declaration->office_location }}</x-table.cell>
-                                        <x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
+                                            {{ $current_declaration->office_location }}
+                                        </x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
                                             <p>{{$current_declaration->address}}</p>
                                             <p>{{$current_declaration->contact}}</p>
                                         </x-table.cell>
-                                        <x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
                                             <p>{{$current_declaration->witness}}</p>
                                             <p>{{$current_declaration->witness_occupation}}</p>
                                         </x-table.cell>
-                                        <x-table.cell>
+                                        <x-table.cell wire:click="show({{$current_declaration->id}})">
                                             <p>{{$current_declaration->person_submitting}}</p>
                                             <p>{{$current_declaration->person_submitting_contact}}</p>
                                         </x-table.cell>
-                                        <!-- <x-table.cell  class="flex justify-center">
-                                            <x-button.link wire:click="show({{$current_declaration->id}})" class="ml-2 flex" >
-                                                <x-icon.view></x-icon.view> Details
-                                            </x-button.link> -->
-                                            <!-- <x-button.link wire:click="create({{ $current_declaration->id }})" class="ml-2 flex items-center ">
-                                                <x-icon.edit></x-icon.edit> Edit
-                                            </x-button.link> -->
-                                        <!-- </x-table.cell> -->
                                     </x-table.row>
                                 @empty
                                 <x-table.cell colspan="3">
@@ -106,15 +119,27 @@
             </div>
         </div>
         <div class="relative">
-            <div class="fixed bottom-10 right-5" >
-                <x-icon.offline class="animate-pulse w-12 h-12 text-white rounded-full p-3 bg-red-400" title="Offline" wire:offline ></x-icon.offline>
-                <x-icon.online class="animate-pulse w-12 h-12 text-white rounded-full p-3 bg-green-400 mt-2" wire:offline.class='hidden' title="Online"></x-icon.online>
-                <x-icon.refresh 
-                    class="w-12 h-12 text-white rounded-full p-3 bg-green-600 mt-2 cursor-pointer hover:bg-green-500" wire:offline.class='hidden' 
-                    wire:click='syncAll'
-                    wire:loading.class='animate-spin'
-                    wire:target='syncAll'
-                    ></x-icon.refresh>
+            <div class="fixed bottom-10 right-5" wire:poll.15s='online' >
+                @if ($connectedToServer === true)
+                    <x-icon.refresh 
+                        class="w-12 h-12 text-white rounded-full p-3 bg-green-600 mt-2 cursor-pointer hover:bg-green-500" wire:offline.class='hidden' 
+                        {{-- wire:poll.30000ms='syncAll' --}}
+                        wire:click='syncAll'
+                        wire:loading.class='animate-spin'
+                        wire:target='syncOne'>
+                    </x-icon.refresh>
+                    <x-icon.online 
+                        class=" animate-pulse w-12 h-12 text-white rounded-full p-3 bg-green-400 mt-2" 
+                        wire:offline.class='hidden' 
+                        >
+                    </x-icon.online>
+                @else
+                    <x-icon.offline 
+                        class="animate-pulse w-12 h-12 text-white rounded-full p-3 bg-red-400" 
+                        >
+                    </x-icon.offline>
+                @endif
+                
             </div>
             <div  >
             </div>

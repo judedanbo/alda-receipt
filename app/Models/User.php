@@ -6,10 +6,11 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, LogsActivity ;
 
     /**
      * The attributes that are mass assignable.
@@ -17,8 +18,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name',
-        'email',
+        // 'name',
+        // 'email',
         'password',
         'username',
         'staff_id',
@@ -34,6 +35,12 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected static $logAttributes = ['username', 'staff_id'];
+
+    protected static $logName = 'user';
+
+    protected static $logOnlyDirty = true;
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -42,6 +49,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    
 
     /**
      * Get the Staff that owns the user Account.

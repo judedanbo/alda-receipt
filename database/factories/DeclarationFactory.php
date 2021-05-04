@@ -37,6 +37,7 @@ class DeclarationFactory extends Factory
             'person_submitting_contact' => $this->faker->phoneNumber ,
             'user_id' => 1 ,
             'qrcode' =>  Str::random(15),
+            'office_id' =>  1,
         ];
     }
 }
