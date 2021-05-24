@@ -32,18 +32,18 @@ class Declaration extends Model
         'synced',
         'office_id'
     ];
-    
+
     protected $casts = [
         'declared_on' => 'date',
         'synced' => 'boolean'
     ];
-     
+
     protected $hidden = [
         'synced'
     ];
 
     protected $appends = [
-        'declared_on_display'
+        // 'declared_on_display'
     ];
 
     protected static $logAttributes = [
@@ -73,7 +73,7 @@ class Declaration extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+
 
     public function getDeclaredOnDisplayAttribute()
     {

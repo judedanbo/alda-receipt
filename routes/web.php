@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Livewire\AppDashboard;
+use App\Http\Livewire\DeclarationByYear;
 use App\Http\Livewire\OfficeData;
 use App\Http\Livewire\OfficeForm;
 use App\Http\Livewire\OfficeView;
@@ -42,14 +43,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/staff', StaffData::class)->name('staff.index');
     Route::get('/staff/{staff}', StaffView::class)->name('staff.show');
     Route::get('/staff-form/{staff?}', StaffForm::class)->name('staff.create');
-    
+
     Route::get('/office', OfficeData::class)->name('office.index');
     Route::get('/office/{office}', OfficeView::class)->name('office.show');
     Route::get('/office-form/{office?}', OfficeForm::class)->name('office.create');
-    
-    
+
+
     Route::get('/declaration', DeclarationData::class)->name('declaration.index');
     Route::get('/declaration/{declaration}', DeclarationView::class)->name('declaration.show');
     Route::get('/declaration/{declaration}/receipt', DeclarationReceipt::class)->name('declaration.receipt');
     Route::get('/declaration-form/{declaration?}', DeclarationForm::class)->name('declaration.form');
 });
+
+Route::get('/byYear', DeclarationByYear::class)->name('declaration.year.summary');
