@@ -2,12 +2,13 @@
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
-use App\Models\Declaration;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use Livewire\Component;
+use Illuminate\Support\Str;
+use App\Models\Declaration;
 use Illuminate\Support\Facades\Http;
 use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
 
 class DeclarationView extends Component
 {
@@ -30,6 +31,12 @@ class DeclarationView extends Component
         redirect()->route('declaration.receipt', ['declaration' => $this->declaration]);
     }
 
+    public function generateQrCode()
+    {
+        $this->declaration->qrcode = Str::random (15);
+        $this->declaration->save();
+    }
+
     public function new()
     {
         redirect()->route('declaration.form');
@@ -44,8 +51,10 @@ class DeclarationView extends Component
         if ($this->declaration->synced === false) {
             $client = new Client([]);
             $promise = $client->postAsync('localhost:8880/api/declarations', ['form_params' => [$this->declaration->toArray()]]);
+            // dd($this->declaration->toArray());
             $promise->then(
-                function (ResponseInterface $res)  {
+                function (ResponseInterface $res) {
+                    // dd($res->getBody()->getContents());
                     if ($res->getBody()->getContents() == 'saved') {
                         $this->declaration->synced = true;
                         $this->declaration->save();
@@ -98,14 +107,14 @@ class DeclarationView extends Component
     public function getConnectedProperty()
     {
         $client = new Client([]);
-            $promise = $client->getAsync('localhost:8880/api/declarations');
-            $promise->then(
-                function (ResponseInterface $res)  {
-                    if ($res->getBody()->getContents() == 'all declarations') {
-                        return true;
-                    }
+        $promise = $client->getAsync('localhost:8880/api/declarations');
+        $promise->then(
+            function (ResponseInterface $res) {
+                if ($res->getBody()->getContents() == 'all declarations') {
+                    return true;
                 }
-            );
+            }
+        );
         return false;
     }
 

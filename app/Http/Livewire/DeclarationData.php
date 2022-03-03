@@ -31,6 +31,7 @@ class DeclarationData extends Component
     public $showFormModal = false;
 
     // public $connectedToServer;
+    protected $queryString = ['sortField', 'sortDirection', 'search' ];
 
     protected $rules = [
         'declaration.declared_on' => 'required|date|before_or_equal:today',
@@ -48,7 +49,7 @@ class DeclarationData extends Component
     ];
 
     protected $messages = [
-        // 'declaration.declared_on.before_or_equal' => 'The date of declaraion must '
+        // 'declaration.declared_on.before_or_equal' => 'The date of declaration must '
     ];
 
     protected $validationAttributes = [
@@ -129,7 +130,7 @@ class DeclarationData extends Component
 
         $validatedStaff['user_id'] = Auth::id();
         $validatedStaff['office_id'] = $office_id;
-        $validatedStaff['qrcode'] = Str::random(15);
+        $validatedStaff['qrcode'] = Str::random (15);
         $validatedStaff['receipt_no'] = $office_number . Str::padLeft($total + 1, 5, '0');
 
         $newDeclaration = Declaration::create($validatedStaff);
@@ -272,6 +273,7 @@ class DeclarationData extends Component
             $promise->then(
                 function (ResponseInterface $res) {
                     $this->connectedToServer = true;
+                    $this->syncAll();
                 },
                 function (RequestException $e) {
                     // dd('failed');
@@ -291,9 +293,9 @@ class DeclarationData extends Component
             // dd($th);
             $this->connectedToServer = false;
         }
-        
+
         // $response->wait();
-        
+
         return ;
     }
 
@@ -302,6 +304,7 @@ class DeclarationData extends Component
         return view('livewire.declaration-data', [
             'declarations' => Declaration::search('declarant_name', $this->search)
             ->search('declared_on', $this->search)
+            ->searchDate('declared_on', $this->search)
             ->search('post', $this->search)
             ->search('schedule', $this->search)
             ->search('office_location', $this->search)

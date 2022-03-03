@@ -36,7 +36,8 @@
                             </div>
 
                             <div class="mx-5">
-                                <h4 class="text-2xl font-semibold text-gray-700">{{$declaration->count()}}</h4>
+                                <h4 class="text-2xl font-semibold text-gray-700">
+                                    {{ number_format($declaration->count()) }}</h4>
                                 <div class="text-gray-500">All Declarations</div>
                             </div>
                         </div>
@@ -49,7 +50,8 @@
                             </div>
 
                             <div class="mx-5">
-                                <h4 class="text-2xl font-semibold text-gray-700">{{$declaration->where('synced', true)->count()}}</h4>
+                                <h4 class="text-2xl font-semibold text-gray-700">
+                                    {{ number_format($declaration->where('synced', true)->count()) }}</h4>
                                 <div class="text-gray-500">Synced</div>
                             </div>
                         </div>
@@ -62,13 +64,20 @@
                             </div>
 
                             <div class="mx-5">
-                                <h4 class="text-2xl font-semibold text-gray-700">{{$declaration->where('synced', false)->count()}}</h4>
+                                <h4 class="text-2xl font-semibold text-gray-700">
+                                    {{ number_format($declaration->where('synced', false)->count()) }}</h4>
                                 <div class="text-gray-500">Local</div>
                             </div>
                         </div>
                     </div>
+
                 </div>
-                
+                <div class="flex flex-wrap -mx-6 mt-5">
+                    <div class="w-full px-6">
+                        @livewire('dashboard-summary')
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

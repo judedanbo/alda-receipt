@@ -13,6 +13,8 @@ use App\Http\Livewire\DeclarationView;
 use App\Http\Livewire\DeclarationReceipt;
 use App\Http\Livewire\DeclarationForm;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\ChangePasswordController;
+// use App\Http\Controllers\Auth\
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,9 @@ require __DIR__.'/auth.php';
 // test Routes
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/change-password', [ChangePasswordController::class, 'change'])->name('change.password');
+    Route::post('/change-password', [ChangePasswordController::class, 'store'])->name('save.password');
+
     Route::get('/dashboard', AppDashboard::class)->name('dashboard');
     Route::get('/staff', StaffData::class)->name('staff.index');
     Route::get('/staff/{staff}', StaffView::class)->name('staff.show');
